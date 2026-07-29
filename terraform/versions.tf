@@ -8,13 +8,14 @@ terraform {
     }
   }
 
-  # Partial config. CI passes the rest with -backend-config (see .github/workflows/deploy.yml).
-  # use_lockfile = S3-native state locking, no DynamoDB table needed (TF >= 1.10).
-  backend "s3" {
-    key          = "react-app/terraform.tfstate"
-    use_lockfile = true
-    encrypt      = true
-  }
+  # ponytail: local state — single operator, no state bucket yet. Uncomment for S3 remote
+  # state (partial config; supply bucket+region via -backend-config) when a second person
+  # or CI needs to run terraform. use_lockfile = S3-native locking, no DynamoDB (TF >= 1.10).
+  # backend "s3" {
+  #   key          = "react-app/terraform.tfstate"
+  #   use_lockfile = true
+  #   encrypt      = true
+  # }
 }
 
 provider "aws" {
