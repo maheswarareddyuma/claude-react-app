@@ -32,6 +32,29 @@ resource "aws_s3_bucket_versioning" "site" {
   }
 }
 
+# Versioning keeps every superseded copy of every asset forever. Each deploy replaces
+# index.html and leaves the old one noncurrent, so the bill grows with deploy count
+# rather than site size. 30 days is well past any window in which a rollback is still
+# the tool you would reach for.
+resource "aws_s3_bucket_lifecycle_configuration" "site" {
+  # Versioning must exist before a noncurrent-version rule can reference it.
+  depends_on = [aws_s3_bucket_versioning.site]
+
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    id     = "expire-noncurrent"
+    status = "Enabled"
+
+    # Empty filter = every object in the bucket.
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+}
+
 resource "aws_cloudfront_origin_access_control" "site" {
   name                              = "${var.project}-oac"
   origin_access_control_origin_type = "s3"

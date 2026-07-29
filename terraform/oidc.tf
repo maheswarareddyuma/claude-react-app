@@ -23,10 +23,15 @@ data "aws_iam_policy_document" "ci_trust" {
     }
     # main only. PR jobs build and test but never assume this role, so a PR from
     # a fork cannot reach the bucket. Do not loosen this to `repo:...:*`.
+    #
+    # Id-qualified subject only (`owner@<owner_id>/repo@<repo_id>`) — that is the form
+    # GitHub issues for this repo, confirmed in CloudTrail. The name-based form is
+    # deliberately absent: it binds to a string that becomes claimable by a stranger if
+    # the repo or the account is ever renamed or deleted. Numeric ids are never reissued.
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/main"]
+      values   = ["repo:${var.github_repo_ids}:ref:refs/heads/main"]
     }
   }
 }
@@ -45,9 +50,11 @@ data "aws_iam_policy_document" "ci" {
     resources = [aws_s3_bucket.site.arn]
   }
 
+  # No s3:GetObject — `aws s3 sync` compares against the ListBucket result, so the
+  # deploy never reads object bodies. Upload and delete is the whole job.
   statement {
     sid       = "SyncSiteObjects"
-    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+    actions   = ["s3:PutObject", "s3:DeleteObject"]
     resources = ["${aws_s3_bucket.site.arn}/*"]
   }
 

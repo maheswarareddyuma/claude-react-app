@@ -1,7 +1,10 @@
-# Copy to terraform.tfvars (gitignored) and set github_repo.
+# Copy to terraform.tfvars (gitignored) and set github_repo_ids.
 # Everything else has a working default; the account id and bucket name are
 # derived from your AWS credentials, not configured here.
-github_repo = "owner/repo"
+#
+# GitHub puts this id-qualified form in the OIDC subject claim. Get it with:
+#   gh api repos/<owner>/<repo> --jq '"\(.owner.login)@\(.owner.id)/\(.name)@\(.id)"'
+github_repo_ids = "owner@000000/repo@0000000"
 
 # aws_region = "us-east-1"
 # project    = "my-react-app"

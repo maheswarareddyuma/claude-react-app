@@ -14,8 +14,9 @@ yarn-error.log*
 *.swp
 
 # terraform
+# .terraform.lock.hcl is deliberately NOT ignored — it pins provider binary hashes
+# so every machine and CI run resolves the same aws provider. Commit it.
 .terraform/
-.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfplan

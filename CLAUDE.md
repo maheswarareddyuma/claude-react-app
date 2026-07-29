@@ -34,7 +34,7 @@ Remote state in S3 with **native lockfile locking** (`use_lockfile`, TF ≥ 1.10
 
 **Terraform never runs in CI.** All infra changes are applied locally by a human via `tf-plan` → `tf-apply`. CI has no state access and no IAM permissions — it can upload objects to the site bucket and create an invalidation, nothing else. If a change needs new infra, apply it before merging the code that depends on it.
 
-**`github_repo` is the only value Terraform asks for** — `owner/repo`, validated, no URL form. It's a security boundary: it decides which repository may assume the deploy role, so it is never defaulted or guessed. Everything else is derived: the AWS account id comes from your credentials, and the bucket name is `${project}-site-${account_id}`, which is globally unique for free. Real values go in `terraform/terraform.tfvars` (gitignored); `terraform.tfvars.example` is the template.
+**`github_repo_ids` is the only value Terraform asks for** — `owner@owner_id/repo@repo_id`, validated. It's a security boundary: it decides which repository may assume the deploy role, so it is never defaulted or guessed. GitHub embeds immutable numeric ids in the OIDC subject claim, and the trust policy matches only that form — the plain `owner/repo` name is deliberately not accepted, because a freed name can be re-registered by someone else while ids are never reissued. Get it with `gh api repos/<owner>/<repo> --jq '"\(.owner.login)@\(.owner.id)/\(.name)@\(.id)"'`. Everything else is derived: the AWS account id comes from your credentials, and the bucket name is `${project}-site-${account_id}`, which is globally unique for free. Real values go in `terraform/terraform.tfvars` (gitignored); `terraform.tfvars.example` is the template.
 
 Create the state bucket by hand, then `terraform init -backend-config="bucket=..." -backend-config="region=..."` and apply. If the account already has the GitHub OIDC provider, `terraform import` it rather than creating a duplicate.
 
@@ -135,6 +135,7 @@ No workflow may contain a destroy step or a `terraform apply`. There is no "tear
 ## Conventions
 
 - Provider versions are pinned in `versions.tf`. Keep them pinned.
-- Never commit: `.terraform/`, `*.tfstate*`, `*.tfplan`, `tf.plan`, `terraform.tfvars`, `.env`, AWS creds. All gitignored — keep it that way.
+- Never commit: `.terraform/`, `*.tfstate*`, `*.tfplan`, `tf.plan`, `terraform.tfvars`, `.env`, AWS creds. All gitignored — keep it that way. `.terraform.lock.hcl` *is* committed: it pins provider hashes across machines.
+- Only `build/static/` is content-hashed. Anything else keeps a fixed filename, so it must never be sent with `immutable` — an invalidation clears the CDN edge, not a browser cache.
 - CRA inlines every `REACT_APP_*` env var into the public bundle. Nothing secret goes there.
 - Bucket names and account IDs come from variables, never hardcoded in resource blocks.
