@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log('Infra policy: terraform destroy/-destroy/state rm/taint/force-unlock and aws bucket+distribution deletion are forbidden. terraform plan first; apply only a saved plan after human approval.')\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-destructive.js\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terraform fmt -recursive \"$CLAUDE_PROJECT_DIR/terraform\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

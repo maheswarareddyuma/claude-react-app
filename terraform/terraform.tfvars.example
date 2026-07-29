@@ -1,0 +1,7 @@
+# Copy to terraform.tfvars (gitignored) and set github_repo.
+# Everything else has a working default; the account id and bucket name are
+# derived from your AWS credentials, not configured here.
+github_repo = "owner/repo"
+
+# aws_region = "us-east-1"
+# project    = "my-react-app"
