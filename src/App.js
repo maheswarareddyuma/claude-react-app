@@ -3,18 +3,14 @@ import React from "react";
 function App() {
   return (
     <div style={{ textAlign: "center", paddingTop: "50px" }}>
-      <h1>Welcome to My React App</h1>
-      <p>This app is running on Nginx!</p>
+      <h1>Welcome to React App Deployed with Claude</h1>
+      <p>This app is running on AWS Cloufront and S3!</p>
 
-      <h2>Deployed by: <strong>Your Full Name</strong></h2>
-      <p>Date: <strong>DD/MM/YYYY</strong></p>
+      <h2>Deployed by: <strong>Sanaga UmaMaheswara Reddy</strong></h2>
 
       <hr style={{ margin: "20px 0" }} />
 
-      <p>
-        P.S. This post is part of the FREE DevOps for Beginners Cohort run by
-        <strong> Pravin Mishra</strong>.
-      </p>
+   
       <p>
         You can start your DevOps journey for free from his{" "}
         <a
